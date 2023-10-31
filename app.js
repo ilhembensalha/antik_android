@@ -1,74 +1,34 @@
 const express = require('express');
-const mysql = require('mysql2');
-const bcrypt = require('bcrypt');
-const config = require('./config');
-
+const authController = require('./authController');
+const annonceController = require('./annonceController');
+const categorieController = require('./categorieController');
 const app = express();
 const port = 3000;
 
 // Middleware pour le corps de la demande (body-parser)
 app.use(express.json());
 
-// Connexion à la base de données MySQL
-const db = mysql.createConnection(config.db);
-db.connect((err) => {
-  if (err) {
-    console.error('Erreur de connexion à la base de données :', err);
-  } else {
-    console.log('Connecté à la base de données MySQL');
-  }
-});
+// Routes d'inscription (signup)
+app.post('/signup', authController.signup);
 
-// Routes d'inscription (sign-up)
-app.post('/signup', (req, res) => {
-  const { username, password } = req.body;
+// Route de connexion (signin)
+app.post('/signin', authController.signin);
 
-  // Hacher le mot de passe
-  bcrypt.hash(password, 10, (err, hash) => {
-    if (err) {
-      console.error('Erreur de hachage du mot de passe :', err);
-      res.status(500).send('Erreur de hachage du mot de passe');
-    } else {
-      // Insérer l'utilisateur dans la base de données
-      const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
-      db.query(query, [username, hash], (err, result) => {
-        if (err) {
-          console.error('Erreur d\'inscription :', err);
-          res.status(500).send('Erreur d\'inscription');
-        } else {
-          res.status(201).send('Inscription réussie');
-        }
-      });
-    }
-  });
-});
+//route annnonce 
+app.post('/annonces', annonceController.createAnnonce);
+app.get('/annonces', annonceController.getAllAnnonces);
+app.get('/annonces/:id', annonceController.getAnnonceById);
+app.put('/annonces/:id', annonceController.updateAnnonce);
+app.delete('/annonces/:id', annonceController.deleteAnnonce);
 
-// Route de connexion (sign-in)
-app.post('/signin', (req, res) => {
-  const { username, password } = req.body;
+// Routes pour les catégories
+app.post('/categories', categorieController.createCategorie);
+app.get('/categories', categorieController.getAllCategories);
+app.get('/categories/:id', categorieController.getCategorieById);
+app.put('/categories/:id', categorieController.updateCategorie);
+app.delete('/categories/:id', categorieController.deleteCategorie);
 
-  // Vérifier l'utilisateur dans la base de données
-  const query = 'SELECT * FROM users WHERE username = ?';
-  db.query(query, [username], (err, results) => {
-    if (err) {
-      console.error('Erreur de connexion :', err);
-      res.status(500).send('Erreur de connexion');
-    } else {
-      if (results.length > 0) {
-        const user = results[0];
-        bcrypt.compare(password, user.password, (err, result) => {
-          if (result) {
-            res.status(200).send('Connexion réussie');
-          } else {
-            res.status(401).send('Mot de passe incorrect');
-          }
-        });
-      } else {
-        res.status(401).send('Utilisateur non trouvé');
-      }
-    }
-  });
-});
+// Le reste de votre configuration...
 
 app.listen(port, () => {
   console.log(`Serveur en cours d'exécution sur le port ${port}`);

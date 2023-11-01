@@ -3,7 +3,7 @@ const db = require('./config'); // Importez votre configuration de base de donn�
 // Créez une nouvelle annonce
 const createAnnonce = (req, res) => {
   const { title, description } = req.body;
-  const query = 'INSERT INTO annonces (title, description,categorie_id) VALUES (?, ?,?)';
+  const query = 'INSERT INTO annonces (title, date,prix,description,categorie_id,image,localisation,nbr-vues,livraison,statut) VALUES (?, ?,?,?,?,?,?,?,?,?)';
   db.query(query, [title, description], (err, result) => {
     if (err) {
       console.error('Erreur lors de la création de l\'annonce :', err);
@@ -47,7 +47,7 @@ const getAnnonceById = (req, res) => {
 const updateAnnonce = (req, res) => {
     const { id } = req.params;
     const { title, description, categorie_id } = req.body;
-    const query = 'UPDATE annonces SET title = ?, description = ?, categorie_id = ? WHERE id = ?';
+    const query = 'UPDATE annonces SET title = ?, description = ?, categorie_id = ?, prix = ?, status = ?, prix = ?, localisation = ?, livraison= ? ,WHERE id = ?';
     db.query(query, [title, description, categorie_id, id], (err, result) => {
       if (err) {
         console.error('Erreur lors de la mise à jour de l\'annonce :', err);
